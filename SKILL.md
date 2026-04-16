@@ -1,6 +1,6 @@
 ---
 name: heap-cli
-description: Analyze Java heap dumps with the local `heap-cli` tool built from this repository. Use when asked to inspect `.hprof` files, identify suspicious retained objects, explain GC root paths, or investigate possible Java memory leaks.
+description: Analyze Java heap dumps with the `heap-cli` command. First try `heap-cli` from `$PATH`; if unavailable, clone `git@github.com:tzezula/heap-skill.git`, build it, and use the executable from `<project_home>/target`.
 ---
 
 # heap-cli
@@ -23,29 +23,42 @@ Use this skill when the user asks to:
 ## Preconditions
 
 1. Confirm the heap dump path from the user.
-2. Prefer the native executable if available:
-   - `target/heap-cli`
-3. If the native executable is not built yet, build it with:
-   - `mvn -Pnative package`
-4. Fallback to the jar only if native executable is unavailable:
-   - `java -jar target/heap-skill-1.0-jar-with-dependencies.jar ...`
+2. First try `heap-cli` from `$PATH`.
+   - `command -v heap-cli`
+3. If `heap-cli` is available on `$PATH`, use it directly.
+4. If `heap-cli` is not available on `$PATH`, clone the project to a local `<project_home>` directory:
+   - `git clone git@github.com:tzezula/heap-skill.git <project_home>`
+5. Build the native executable from `<project_home>`:
+   - `cd <project_home> && mvn -Pnative package`
+6. Use the built executable from the project target directory:
+   - `<project_home>/target/heap-cli`
+7. Fallback to the jar only if the native executable is unavailable:
+   - `java -jar <project_home>/target/heap-cli-1.0-jar-with-dependencies.jar ...`
 
 ## Preferred Invocation
 
+If `heap-cli` is on `$PATH`, use:
+
 ```bash
-target/heap-cli <heap-dump.hprof> <command> ...
+heap-cli <heap-dump.hprof> <command> ...
+```
+
+If you had to build the project locally, use:
+
+```bash
+<project_home>/target/heap-cli <heap-dump.hprof> <command> ...
 ```
 
 Alternative form:
 
 ```bash
-target/heap-cli --heap <heap-dump.hprof> <command> ...
+heap-cli --heap <heap-dump.hprof> <command> ...
 ```
 
 Jar fallback:
 
 ```bash
-java -jar target/heap-skill-1.0-jar-with-dependencies.jar <heap-dump.hprof> <command> ...
+java -jar <project_home>/target/heap-cli-1.0-jar-with-dependencies.jar <heap-dump.hprof> <command> ...
 ```
 
 ## Core Workflow
@@ -73,7 +86,7 @@ For possible memory leaks, use this workflow in order:
 ### Count-oriented type listing
 
 ```bash
-target/heap-cli dump.hprof types [--filter <text>] [start] [count]
+heap-cli dump.hprof types [--filter <text>] [start] [count]
 ```
 
 Use for:
@@ -83,7 +96,7 @@ Use for:
 ### Retained-size type listing
 
 ```bash
-target/heap-cli dump.hprof types-retained [--filter <text>] [start] [count]
+heap-cli dump.hprof types-retained [--filter <text>] [start] [count]
 ```
 
 Use for:
@@ -93,7 +106,7 @@ Use for:
 ### Biggest retained objects
 
 ```bash
-target/heap-cli dump.hprof biggest [start] [count]
+heap-cli dump.hprof biggest [start] [count]
 ```
 
 Use for:
@@ -102,7 +115,7 @@ Use for:
 ### Instances of one type
 
 ```bash
-target/heap-cli dump.hprof instances <type> [start] [count]
+heap-cli dump.hprof instances <type> [start] [count]
 ```
 
 Use for:
@@ -112,7 +125,7 @@ Use for:
 ### Inspect one object
 
 ```bash
-target/heap-cli dump.hprof inspect <instance-id>
+heap-cli dump.hprof inspect <instance-id>
 ```
 
 Use for:
@@ -123,7 +136,7 @@ Use for:
 ### Incoming references
 
 ```bash
-target/heap-cli dump.hprof refs-in <instance-id> [start] [count]
+heap-cli dump.hprof refs-in <instance-id> [start] [count]
 ```
 
 Use for:
@@ -133,7 +146,7 @@ Use for:
 ### Outgoing references
 
 ```bash
-target/heap-cli dump.hprof refs-out <instance-id> [start] [count]
+heap-cli dump.hprof refs-out <instance-id> [start] [count]
 ```
 
 Use for:
@@ -143,7 +156,7 @@ Use for:
 ### Single GC root path
 
 ```bash
-target/heap-cli dump.hprof gcroot <instance-id>
+heap-cli dump.hprof gcroot <instance-id>
 ```
 
 Use for:
@@ -152,7 +165,7 @@ Use for:
 ### Multiple GC root paths
 
 ```bash
-target/heap-cli dump.hprof gcroots <instance-id> [count]
+heap-cli dump.hprof gcroots <instance-id> [count]
 ```
 
 Use for:
@@ -164,8 +177,8 @@ Use for:
 ### Recipe: “Find what dominates memory”
 
 ```bash
-target/heap-cli dump.hprof types-retained 0 30
-target/heap-cli dump.hprof biggest 0 30
+heap-cli dump.hprof types-retained 0 30
+heap-cli dump.hprof biggest 0 30
 ```
 
 Then inspect the top few suspects.
@@ -173,19 +186,19 @@ Then inspect the top few suspects.
 ### Recipe: “This type seems to leak”
 
 ```bash
-target/heap-cli dump.hprof instances com.example.MyType 0 20
-target/heap-cli dump.hprof inspect <instance-id>
-target/heap-cli dump.hprof refs-in <instance-id> 0 20
-target/heap-cli dump.hprof gcroots <instance-id> 5
+heap-cli dump.hprof instances com.example.MyType 0 20
+heap-cli dump.hprof inspect <instance-id>
+heap-cli dump.hprof refs-in <instance-id> 0 20
+heap-cli dump.hprof gcroots <instance-id> 5
 ```
 
 ### Recipe: “Large string / map / list growth”
 
 ```bash
-target/heap-cli dump.hprof types --filter String 0 20
-target/heap-cli dump.hprof types-retained --filter HashMap 0 20
-target/heap-cli dump.hprof types-retained --filter ArrayList 0 20
-target/heap-cli dump.hprof biggest 0 20
+heap-cli dump.hprof types --filter String 0 20
+heap-cli dump.hprof types-retained --filter HashMap 0 20
+heap-cli dump.hprof types-retained --filter ArrayList 0 20
+heap-cli dump.hprof biggest 0 20
 ```
 
 ### Recipe: “Explain a suspected leak clearly”
@@ -229,6 +242,8 @@ Be careful with:
 - Do not conclude “memory leak” from one GC root path alone; inspect referrers and object contents too.
 - Explain whether the retention looks expected, suspicious, or clearly wrong.
 - When possible, give the user a concrete retention narrative, not just raw command output.
+- Try `heap-cli` from `$PATH` first.
+- If `heap-cli` is not on `$PATH`, clone and build the project, then use `<project_home>/target/heap-cli`.
 - If native executable is available, prefer it over the jar because startup time matters for iterative analysis.
 
 ## Examples
@@ -236,27 +251,28 @@ Be careful with:
 ### Example: first-pass leak triage
 
 ```bash
-target/heap-cli app.hprof types-retained 0 20
-target/heap-cli app.hprof biggest 0 20
+heap-cli app.hprof types-retained 0 20
+heap-cli app.hprof biggest 0 20
 ```
 
 ### Example: investigate one suspicious type
 
 ```bash
-target/heap-cli app.hprof instances com.example.CacheEntry 0 20
-target/heap-cli app.hprof inspect 12345678
-target/heap-cli app.hprof refs-in 12345678 0 20
-target/heap-cli app.hprof gcroots 12345678 5
+heap-cli app.hprof instances com.example.CacheEntry 0 20
+heap-cli app.hprof inspect 12345678
+heap-cli app.hprof refs-in 12345678 0 20
+heap-cli app.hprof gcroots 12345678 5
 ```
 
 ### Example: count-oriented scan for string growth
 
 ```bash
-target/heap-cli app.hprof types --filter String 0 20
+heap-cli app.hprof types --filter String 0 20
 ```
 
 ## References
 
+- Project repository: `git@github.com:tzezula/heap-skill.git`
 - Project documentation: `README.md`
 - Main entrypoint: `src/main/java/org/tzezula/heapcli/Main.java`
 - Heap analysis implementation: `src/main/java/org/tzezula/heapcli/HeapExplorer.java`

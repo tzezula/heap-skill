@@ -1,4 +1,4 @@
-# heap-skill
+# heap-cli
 
 CLI for exploring Java heap dumps with the VisualVM JFluid heap library.
 
@@ -34,13 +34,13 @@ mvn package
 
 Jar artifacts:
 
-- `target/heap-skill-1.0.jar`
-- `target/heap-skill-1.0-jar-with-dependencies.jar`
+- `target/heap-cli-1.0.jar`
+- `target/heap-cli-1.0-jar-with-dependencies.jar`
 
 Runnable jar:
 
 ```bash
-java -jar target/heap-skill-1.0-jar-with-dependencies.jar help
+java -jar target/heap-cli-1.0-jar-with-dependencies.jar help
 ```
 
 ## Usage
@@ -68,7 +68,7 @@ heap-cli --heap <heap-dump.hprof> <command> ...
 If you are using the jar build, the same commands can be run via:
 
 ```bash
-java -jar target/heap-skill-1.0-jar-with-dependencies.jar <heap-dump.hprof> <command> ...
+java -jar target/heap-cli-1.0-jar-with-dependencies.jar <heap-dump.hprof> <command> ...
 ```
 
 Defaults:
@@ -184,7 +184,7 @@ target/heap-cli mydump.hprof gcroots 12345678 5
 Jar fallback:
 
 ```bash
-java -jar target/heap-skill-1.0-jar-with-dependencies.jar mydump.hprof types --filter String 0 20
+java -jar target/heap-cli-1.0-jar-with-dependencies.jar mydump.hprof types --filter String 0 20
 ```
 
 ## Leak-analysis workflow
